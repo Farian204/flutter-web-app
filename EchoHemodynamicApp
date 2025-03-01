@@ -1,0 +1,95 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(EchoCalculatorApp());
+}
+
+class EchoCalculatorApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Ekokardiyografi Hesaplama',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: EchoCalculatorScreen(),
+    );
+  }
+}
+
+class EchoCalculatorScreen extends StatefulWidget {
+  @override
+  _EchoCalculatorScreenState createState() => _EchoCalculatorScreenState();
+}
+
+class _EchoCalculatorScreenState extends State<EchoCalculatorScreen> {
+  final TextEditingController rvotVtiController = TextEditingController();
+  final TextEditingController trikuspJetController = TextEditingController();
+  final TextEditingController eWaveController = TextEditingController();
+  final TextEditingController eLateralController = TextEditingController();
+  final TextEditingController eSeptalController = TextEditingController();
+  final TextEditingController maxIvcController = TextEditingController();
+  final TextEditingController atriumVolController = TextEditingController();
+  final TextEditingController bodySurfaceAreaController = TextEditingController();
+  final TextEditingController trikuspSController = TextEditingController();
+  final TextEditingController trikuspGradientController = TextEditingController();
+
+  double? pvr, pcwp, eplar, rap, basitPapi;
+  String splanknikKonjesyon = "Bilinmiyor";
+  Color pvrColor = Colors.grey, pcwpColor = Colors.grey, eplarColor = Colors.grey, rapColor = Colors.grey, splanknikColor = Colors.grey;
+
+  void calculate() {
+    double? rvotVti = double.tryParse(rvotVtiController.text);
+    double? trikuspJet = double.tryParse(trikuspJetController.text);
+    double? eWave = double.tryParse(eWaveController.text);
+    double? eLateral = double.tryParse(eLateralController.text);
+    double? eSeptal = double.tryParse(eSeptalController.text);
+    double? maxIvc = double.tryParse(maxIvcController.text);
+    double? atriumVol = double.tryParse(atriumVolController.text);
+    double? bsa = double.tryParse(bodySurfaceAreaController.text);
+    double? trikuspS = double.tryParse(trikuspSController.text);
+    double? trikuspGradient = double.tryParse(trikuspGradientController.text);
+
+    if (rvotVti != null && trikuspJet != null && trikuspJet != 0) {
+      pvr = (rvotVti / trikuspJet) * 10;
+      pvrColor = pvr! < 2.2 ? Colors.green : Colors.red;
+    }
+
+    if (eWave != null && eLateral != null && eSeptal != null) {
+      pcwp = (eWave / ((eLateral + eSeptal) / 2)) + 4;
+      pcwpColor = pcwp! < 15 ? Colors.green : Colors.red;
+    }
+
+    if (trikuspJet != null && pcwp != null) {
+      eplar = trikuspJet / (pcwp! - 4);
+      eplarColor = eplar! >= 0.3 ? Colors.green : Colors.red;
+    }
+
+    if (maxIvc != null && atriumVol != null && bsa != null && trikuspS != null) {
+      rap = 2.04 + (maxIvc * 5.5) + ((atriumVol / bsa) * 0.07) - (0.57 * trikuspS);
+      rapColor = rap! < 15 ? Colors.green : Colors.red;
+    }
+
+    if (trikuspGradient != null && maxIvc != null) {
+      basitPapi = trikuspGradient / maxIvc;
+    }
+
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Ekokardiyografi Hesaplama')),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(controller: rvotVtiController, decoration: InputDecoration(labelText: 'RVOT VTI')),
+            TextField(controller: trikuspJetController, decoration: InputDecoration(labelText: 'Triküspid Jet Hızı')),
+            SizedBox(height: 20),
+            ElevatedButton(onPressed: calculate, child: Text('Hesapla')),
+          ],
+        ),
+      ),
+    );
+  }
+}
